@@ -1,0 +1,21 @@
+# SystemVerilog Generated Files
+*.sv.bak
+*.log
+*.jou
+*.pb
+*.wdb
+xsim.dir/
+.Xil/
+*.str
+
+# Simulation Junk
+output/
+waveforms/
+*.vcd
+*.fsdb
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*~
