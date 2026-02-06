@@ -10,20 +10,21 @@ The Hierarchical Cache Design provides a 3-level memory hierarchy to bridge the 
 - **Replacement**: Pseudo-LRU (Counter-based Victim Selection).
 - **FSM States**:
   - `IDLE`: Waits for CPU Request.
-  - `COMPARE`: Checks Tag Arrays for Hit.
-    - **Hit**: Read data from Data Array or Write to Data Array (and set Dirty).
-    - **Miss**: Check Victim. If Dirty, `WRITEBACK`. Else `ALLOCATE`.
-  - `WRITEBACK`: Evict victim line to L2.
-  - `ALLOCATE_WAIT`: Fetch new line from L2.
+  - `COMPARE`: Checks Tag Arrays for Hit/Miss.
+    - **Hit**: Return data or update line (and mark dirty).
+    - **Miss**: Select victim. If dirty, `WRITEBACK`. Else `ALLOCATE_WAIT`.
+  - `WRITEBACK`: Evict dirty victim line to lower level.
+  - `ALLOCATE_WAIT`: Send read request and wait for data return.
+  - `UPDATE`: Post-refill synchronization cycle to allow SRAM output to settle before re-comparing.
 
 ### L2 Cache (Unified)
 - **Parameters**: 256KB, 8-Way Set Associative.
 - **Role**: Backing store for L1s. Handles both Instruction and Data misses.
-- **Flow**: Similar to L1, but capable of handling Burst Transactions (Line-wide).
+- **FSM States**: `IDLE`, `COMPARE`, `WRITEBACK_START` (Wait for Grant), `WRITEBACK_WAIT` (Wait for ACK), `FILL_REQ`, `FILL_WAIT`, `UPDATE`.
 
 ### L3 Cache (LLC)
-- **Parameters**: 1024KB (1MB) or larger.
-- **Role**: Last Level Cache interacting with Main Memory.
+- **Parameters**: 8MB (8192KB).
+- **Role**: Last Level Cache interacting with Main Memory. Uses the same unified cache microarchitecture as L2.
 
 ## Data Structures
 Each Cache Way consists of two SRAM arrays:
@@ -33,12 +34,13 @@ Each Cache Way consists of two SRAM arrays:
     - Width = `CACHE_LINE_SIZE` (512 bits)
     - *Future Optimization*: Split Loop for Byte Enable or Banked Architecture.
 
-## Interface Protocol (Cache-to-Cache)
-The `mem_if` interface simplifies connections:
-- Lower Level (Master) -> Upper Level (Slave) : `req` Channel
-- Upper Level (Slave) -> Lower Level (Master) : `resp` Channel
+## Interface Protocol
+For maximum tool compatibility (specifically **Icarus Verilog**), the hardware uses **Packed Structs** (`cache_req_t` and `cache_resp_t`) for all inter-module communication.
 
-This allows `l1_cache` to be a Master on its `mem_port` (connecting to L2) and a Slave on its `cpu_port`.
+- **Request Channel**: Master drives `addr`, `data`, `line_data`, `cmd`, `valid`, `is_burst`.
+- **Response Channel**: Slave drives `ready` (acceptance), `valid` (data return), `data`, `line_data`, `error`.
+
+Modules unroll these structs into local logic signals within their `always` blocks to avoid simulator-specific limitations with direct struct member indexing.
 
 ## Synthesis Notes
 - **SRAM**: Inferred as Distributed RAM or Block RAM depending on size and tool settings.
