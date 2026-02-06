@@ -1,3 +1,5 @@
+import cache_pkg::*;
+
 module hierarchical_cache_top (
     input logic clk,
     input logic rst_n,
@@ -16,48 +18,49 @@ module hierarchical_cache_top (
 );
     
     // -------------------------------------------------------------------------
-    // Connectors
+    // Connectors (Local Structs replace Interfaces for Icarus compatibility)
     // -------------------------------------------------------------------------
     
-    // L1 -> L2 Interconnect
-    mem_if l1i_if  (clk, rst_n);
-    mem_if l1d_if  (clk, rst_n);
-    mem_if l1_arb_out_if (clk, rst_n);
+    // L1I <-> Arbiter
+    cache_req_t  l1i_mem_req;
+    cache_resp_t l1i_mem_resp;
     
-    // L2 -> L3 Interconnect
-    mem_if l2_if (clk, rst_n);
+    // L1D <-> Arbiter
+    cache_req_t  l1d_mem_req;
+    cache_resp_t l1d_mem_resp;
+
+    // Arbiter <-> L2
+    cache_req_t  l1_arb_req;
+    cache_resp_t l1_arb_resp;
     
-    // L3 -> Mem Interconnect
-    mem_if l3_mem_if (clk, rst_n);
+    // L2 <-> L3
+    cache_req_t  l2_l3_req;
+    cache_resp_t l2_l3_resp;
+
+    // L3 <-> Mem
+    cache_req_t  l3_mem_req;
+    cache_resp_t l3_mem_resp;
 
     // -------------------------------------------------------------------------
     // L1 Caches (Instruction & Data)
     // -------------------------------------------------------------------------
     
-    // Connect IO Request structs to Interface
-    assign l1i_if.req = cpu_l1i_req_i;
-    assign cpu_l1i_resp_o = l1i_if.resp;
-    
-    mem_if l1i_mem_port (clk, rst_n);
-    
     l1_cache u_l1i (
         .clk(clk),
         .rst_n(rst_n),
-        .cpu_port(l1i_if), // CPU <-> L1I
-        .mem_port(l1i_mem_port) // L1I <-> Arbiter
+        .cpu_req_i(cpu_l1i_req_i),
+        .cpu_resp_o(cpu_l1i_resp_o),
+        .mem_req_o(l1i_mem_req),
+        .mem_resp_i(l1i_mem_resp)
     );
 
-    // D-Cache
-    assign l1d_if.req = cpu_l1d_req_i;
-    assign cpu_l1d_resp_o = l1d_if.resp;
-    
-    mem_if l1d_mem_port (clk, rst_n);
-    
     l1_cache u_l1d (
         .clk(clk),
         .rst_n(rst_n),
-        .cpu_port(l1d_if), // CPU <-> L1D
-        .mem_port(l1d_mem_port) // L1D <-> Arbiter
+        .cpu_req_i(cpu_l1d_req_i),
+        .cpu_resp_o(cpu_l1d_resp_o),
+        .mem_req_o(l1d_mem_req),
+        .mem_resp_i(l1d_mem_resp)
     );
 
     // -------------------------------------------------------------------------
@@ -66,35 +69,50 @@ module hierarchical_cache_top (
     mem_arbiter_2to1 u_l1_arbiter (
         .clk(clk),
         .rst_n(rst_n),
-        .in0(l1d_mem_port), // Data Cache Priority usually higher? Or equal.
-        .in1(l1i_mem_port),
-        .out(l1_arb_out_if)
+        .in0_req_i(l1d_mem_req),
+        .in0_resp_o(l1d_mem_resp),
+        .in1_req_i(l1i_mem_req),
+        .in1_resp_o(l1i_mem_resp),
+        .out_req_o(l1_arb_req),
+        .out_resp_i(l1_arb_resp)
     );
 
     // -------------------------------------------------------------------------
-    // L2 Cache
+    // L2 Cache (Unified)
     // -------------------------------------------------------------------------
-    l2_cache u_l2 (
+    unified_cache #(
+        .SIZE_KB(L2_SIZE_KB),
+        .ASSOC(L2_ASSOC),
+        .CACHE_NAME("L2")
+    ) u_l2 (
         .clk(clk),
         .rst_n(rst_n),
-        .prev_port(l1_arb_out_if),
-        .next_port(l2_if)
+        .prev_req_i(l1_arb_req),
+        .prev_resp_o(l1_arb_resp),
+        .next_req_o(l2_l3_req),
+        .next_resp_i(l2_l3_resp)
     );
 
     // -------------------------------------------------------------------------
-    // L3 Cache
+    // L3 Cache (Unified)
     // -------------------------------------------------------------------------
-    l3_cache u_l3 (
+    unified_cache #(
+        .SIZE_KB(L3_SIZE_KB),
+        .ASSOC(L3_ASSOC),
+        .CACHE_NAME("L3")
+    ) u_l3 (
         .clk(clk),
         .rst_n(rst_n),
-        .prev_port(l2_if),
-        .next_port(l3_mem_if)
+        .prev_req_i(l2_l3_req),
+        .prev_resp_o(l2_l3_resp),
+        .next_req_o(l3_mem_req),
+        .next_resp_i(l3_mem_resp)
     );
 
     // -------------------------------------------------------------------------
     // Memory Interface
     // -------------------------------------------------------------------------
-    assign mem_req_o = l3_mem_if.req;
-    assign l3_mem_if.resp = mem_resp_i;
+    assign mem_req_o = l3_mem_req;
+    assign l3_mem_resp = mem_resp_i;
 
 endmodule

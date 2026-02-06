@@ -21,12 +21,25 @@
 ## Running Simulation
 The testbench `tb_hierarchical_cache` verifies the end-to-end flow from CPU -> L1 -> L2 -> L3 -> Memory.
 
+### Using Icarus Verilog (Recommended for quick testing)
+Icarus Verilog has limited support for complex SystemVerilog hierarchies. To resolve this, use the provided `concat.py` script to generate a single-file version of the RTL and TB.
+
+1.  **Generate Single File**:
+    ```bash
+    python concat.py
+    ```
+2.  **Compile and Run**:
+    ```bash
+    iverilog -g2012 -s tb_hierarchical_cache -o sim.vvp all_in_one.sv
+    vvp sim.vvp
+    ```
+
 ### Using Vivado XSim
 1. Open Vivado.
 2. In Tcl Console, add files:
-   ```tcl
-   add_files [glob rtl/include/*.sv rtl/common/*.sv rtl/l1_cache/*.sv rtl/l2_cache/*.sv rtl/l3_cache/*.sv rtl/*.sv tb/*.sv]
-   ```
+    ```tcl
+    add_files [glob rtl/include/*.sv rtl/common/*.sv rtl/l1_cache/*.sv rtl/hierarchical_cache_top.sv tb/*.sv]
+    ```
 3. Run Simulation -> Run Behavioral Simulation.
 
 ## Running Synthesis

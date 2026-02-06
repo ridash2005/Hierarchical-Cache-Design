@@ -1,5 +1,7 @@
+import cache_pkg::*;
+
 interface mem_if (input logic clk, input logic rst_n);
-    import cache_pkg::*;
+
 
     // Signals
     cache_req_t  req;

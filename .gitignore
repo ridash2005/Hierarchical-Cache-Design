@@ -1,21 +1,29 @@
-# SystemVerilog Generated Files
-*.sv.bak
-*.log
-*.jou
-*.pb
-*.wdb
-xsim.dir/
-.Xil/
-*.str
-
-# Simulation Junk
-output/
-waveforms/
+# Simulation Artifacts
+*.vvp
 *.vcd
-*.fsdb
+sim_output.txt
+all_in_one.sv
+compile_err.txt
+err.txt
 
-# Editors
-.vscode/
-.idea/
-*.swp
-*~
+# Vivado / Synthesis Artifacts
+*.jou
+*.log
+*.pb
+synthesis_utilization.rpt
+synthesis_power.rpt
+synthesis_timing.rpt
+usage_statistics_webtalk.html
+usage_statistics_webtalk.xml
+.Xil/
+
+# OS/Python Artifacts
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# My Temp Files
+test_struct.sv
+mod_def.sv
+all_in_one.v

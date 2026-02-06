@@ -17,6 +17,19 @@ package cache_pkg;
     parameter L1_INDEX_WIDTH  = $clog2(L1_SETS);
     parameter L1_OFFSET_WIDTH = $clog2(CACHE_LINE_SIZE/8);
     parameter L1_TAG_WIDTH    = ADDR_WIDTH - L1_INDEX_WIDTH - L1_OFFSET_WIDTH;
+    
+    // -------------------------------------------------------------------------
+    // L2 Configuration
+    // -------------------------------------------------------------------------
+    parameter L2_SIZE_KB      = 256;
+    parameter L2_ASSOC        = 8;
+    
+    // -------------------------------------------------------------------------
+    // L3 Configuration
+    // -------------------------------------------------------------------------
+    parameter L3_SIZE_KB      = 8192;
+    parameter L3_ASSOC        = 16;
+
 
     // -------------------------------------------------------------------------
     // Transaction Types

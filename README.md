@@ -30,6 +30,7 @@ graph TD;
 *   [Getting Started](docs/GETTING_STARTED.md) - Simulation and Synthesis instructions.
 *   [Interface Spec](docs/INTERFACE.md) - Signal definitions and Protocol details.
 *   [Architecture](docs/ARCHITECTURE.md) - Deep dive into internal FSMs and Tag Arrays.
+*   [Verification Report](docs/VERIFICATION.md) - Latest simulation results and test coverage.
 
 ## Usage
 This module is designed to be treated as a Black Box IP.
@@ -47,15 +48,24 @@ hierarchical_cache_top u_cache_sys (
 );
 ```
 
-## Verification
-The design includes a self-checking testbench (`tb/tb_hierarchical_cache.sv`) covering:
-1.  Read/Write Hits.
-2.  Cold Misses & Allocation.
-3.  Write-Back mechanism verifying data integrity.
-4.  End-to-End latency checks.
+## Quick Start (Icarus Verilog)
+This project is optimized for Icarus Verilog compatibility. We provide a concatenation script to simplify simulation with multi-file SystemVerilog projects.
+
+1.  **Prepare Files**:
+    ```powershell
+    python concat.py
+    ```
+2.  **Compile**:
+    ```powershell
+    iverilog -g2012 -s tb_hierarchical_cache -o sim.vvp all_in_one.sv
+    ```
+3.  **Run**:
+    ```powershell
+    vvp sim.vvp
+    ```
 
 ## Synthesis
-Verified with Xilinx Vivado 2023.x.
+Verified with Xilinx Vivado. The design uses standard SystemVerilog constructs and is ready for FPGA/ASIC implementation.
 Run `scripts/run_vivado_synth.tcl` to validate.
 
 ---
