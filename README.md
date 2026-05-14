@@ -1,8 +1,8 @@
-![Cache System](https://img.shields.io/badge/SystemVerilog-Synthesizable-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Status](https://img.shields.io/badge/Status-Verified-success)
+[![SystemVerilog](https://img.shields.io/badge/SystemVerilog-0052CC.svg)](https://en.wikipedia.org/wiki/SystemVerilog) [![Python](https://img.shields.io/badge/Python-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/) [![Xilinx Vivado](https://img.shields.io/badge/Vivado-E3008C.svg)](https://www.xilinx.com/products/design-tools/vivado.html) [![Icarus Verilog](https://img.shields.io/badge/Icarus%20Verilog-green.svg)](http://iverilog.icarus.com/) [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 # Hierarchical Cache System (L1/L2/L3)
 
-A professional, industry-grade, and modular 3-level cache memory subsystem design written in SystemVerilog. This project implements a fully synthesizable memory hierarchy featuring split L1 I/D caches, centralized L2, and Last-Level L3 cache, abstracting complexity behind a simple transactional interface.
+A modular 3-level cache memory subsystem written in SystemVerilog. This project implements a fully synthesizable memory hierarchy featuring split L1 I/D caches, centralized L2, and Last-Level L3 cache, using a simple transactional interface.
 
 ---
 
@@ -69,4 +69,4 @@ Verified with Xilinx Vivado. The design uses standard SystemVerilog constructs a
 Run `scripts/run_vivado_synth.tcl` to validate.
 
 ---
-*Maintained by the Advanced Cache Design Team*
+*Maintained by [Rickarya Das](https://github.com/ridash2005)*
